@@ -1,16 +1,24 @@
-# This is a sample Python script.
+import matplotlib.pyplot as plt
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def read_file(filename):
+    with open(filename, 'r') as file:
+        data = file.read().splitlines()
+        return [float(x) for x in data]
 
+# Зчитування даних з файлів
+data1 = read_file("ga.txt")
+data2 = read_file("avg.txt")
+data3 = read_file("crossover.txt")
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# Побудова графіку
+plt.plot(data1, label='Discrete recombination')
+plt.plot(data2, label='Average recombination')
+plt.plot(data3, label='Crossover')
 
+# Додавання назв вісей і легенди
+plt.xlabel('Count generation')
+plt.ylabel('Fitness value')
+plt.legend()
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Відображення графіку
+plt.show()

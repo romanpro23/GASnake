@@ -14,6 +14,7 @@ class Snake:
         self.color = (255, 255, 255)
         self.color_head = (0, 255, 100)
         self.score = 0
+        self.fitness_score = 0
 
         self.dx = 0
         self.dy = 0
@@ -72,3 +73,5 @@ class Snake:
 
     def check_die(self):
         return self._check_wall() or self._check_self()
+
+

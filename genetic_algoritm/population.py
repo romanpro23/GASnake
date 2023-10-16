@@ -31,7 +31,7 @@ class Population:
         self._phenotype(child, snake_m, snake_f)
         brain = child.brain.brain
         for c, m, f in zip(brain.parameters(), snake_m.brain.brain.parameters(), snake_f.brain.brain.parameters()):
-            self._shuffle(c, m, f)
+            self._crossover(c, m, f)
             self._mutation(c)
 
         return child
@@ -53,11 +53,22 @@ class Population:
             b = random.randint(0, 255)
             c.color_head = (r, g, b)
 
-    def _shuffle(self, c, m, f):
+    def _crossover(self, c, m, f):
         with torch.no_grad():
             mask = torch.rand_like(c) < 0.5
             c[mask] = m[mask]
             c[~mask] = f[~mask]
+
+    def _crossover_onpnt(self, c, m, f):
+        with torch.no_grad():
+            rand_p = torch.randint(0, m.shape[0], (1,))
+            mask = torch.cat([i < rand_p for i in range(m.shape[0])])
+            c[mask] = m[mask]
+            c[~mask] = f[~mask]
+
+    def _crossover_avg(self, c, m, f):
+        with torch.no_grad():
+            c[...] = (m + f) / 2
 
     def _mutation(self, c):
         with torch.no_grad():
@@ -69,8 +80,9 @@ class Population:
             c[mask] = rand[mask]
 
     def selection(self):
-        fitness = [i for i, snake in enumerate(self.snakes) for _ in range(snake.score)]
+        count_score = sum(snake.fitness_score for snake in self.snakes) / 100
+        fitness = [i for i, snake in enumerate(self.snakes) for _ in range(int(snake.fitness_score / count_score))]
         # fitness = [i for i, snake in enumerate(self.snakes) for _ in range(snake.score if snake.score > 1 else 0)]
         # fitness = [i for i, snake in enumerate(self.snakes) for _ in range(snake.score * 10 if snake.score > 0 else 1)]
-        print(fitness)
+        print(count_score)
         return fitness

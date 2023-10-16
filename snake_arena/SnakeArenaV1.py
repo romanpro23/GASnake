@@ -32,7 +32,7 @@ def draw_borders(score, epsilon, max_score, generation=None):
 
     return start_position
 
-snake_speed=100
+snake_speed=1000
 
 def gameLoop():
     pygame.display.update()
@@ -46,7 +46,7 @@ def gameLoop():
     game_end = [False] * count
     reward_counter = [0] * count
     count_subpopulation = 20
-    population = Population(count * count_subpopulation)
+    population = Population(count * count_subpopulation, mutation_rate=0.01)
     snakes = []
     foods = [Food(h, w) for _ in range(count)]
 
@@ -61,7 +61,7 @@ def gameLoop():
     counter_subpopulation = 0
     boards = []
     epsilon = population.mutation_rate
-    max_count_step = 70
+    max_count_step = [70] * count
 
     while not game_over:
         for event in pygame.event.get():
@@ -73,6 +73,7 @@ def gameLoop():
             population.crossover()
             generation += 1
             population_alive = True
+
             # generation % 20:
             #     max_reward += 50
         if not subpopulation_alive:
@@ -94,10 +95,13 @@ def gameLoop():
             preEvent = [pygame.K_RIGHT] * count
             game_end = [False] * count
             reward_counter = [0] * count
+            max_count_step = [70] * count
             subpopulation_alive = False
             continue
 
         for i in range(count):
+            head_x, head_y = snakes[i].body[0]
+
             if not game_end[i]:
                 snake = snakes[i]
                 food = foods[i]
@@ -125,16 +129,21 @@ def gameLoop():
                     preEvent[i] = action
 
                 snake.move(dx[i], dy[i])
+                food_x, food_y = foods[i].x, foods[i].y
                 reward = snake.ate([food]) * 10
                 game_end[i] = snake.check_die()
 
                 if reward == 0:
                     reward_counter[i] += 1
                 else:
-                    max_count_step += 1
+                    max_count_step[i] += 1
                     reward_counter[i] = 0
 
-                if reward_counter[i] > max_count_step:
+                    fitness_score = (1200 - (reward_counter[i] - (abs(head_x - food_x) + abs(head_y - food_y)))) / (1200 / len(snake.body))
+                    snake.fitness_score += fitness_score
+                    head_x, head_y = snakes[i].body[0]
+
+                if reward_counter[i] > max_count_step[i]:
                     game_end[i] = True
                     reward_counter[i] = 0
                 boards[i] = make_board(snake, [food], [])
